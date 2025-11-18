@@ -11,7 +11,8 @@
 	/**
 	 * Handle login form submission
 	 * Uses async/await pattern as required
-	 * Uses Svelte store to manage login state
+	 * REQUIRED: Uses Svelte Store + browser storage (localStorage) for login information
+	 * The loginUser() function stores login info in Svelte stores which automatically persist to localStorage
 	 */
 	async function handleLogin() {
 		error = '';

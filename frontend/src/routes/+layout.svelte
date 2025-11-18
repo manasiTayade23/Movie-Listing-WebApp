@@ -1,42 +1,25 @@
 <script lang="ts">
 	import '../app.css';
 	import { browser } from '$app/environment';
-	import { userStore, watchlistStore, initUser } from '$lib/stores';
-	import { watchlistAPI } from '$lib/api/client';
+	import { userStore, watchlistStore } from '$lib/stores';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import { onMount } from 'svelte';
 
-	// Initialize user from backend session and load watchlist
-	// Stores automatically load from localStorage on creation
+	// Stores automatically load from localStorage on creation via createPersistentStore
+	// No backend initialization needed - all data is stored client-side using Svelte stores
 	onMount(() => {
 		if (!browser) return;
 
-		let unsubscribe: () => void;
-
-		const loadWatchlist = async () => {
-			try {
-				const response = await watchlistAPI.getWatchlist();
-				watchlistStore.set(response.movies.map((m) => m.id));
-			} catch (error) {
-				// Watchlist might be empty, that's okay
+		// Subscribe to user changes to clear watchlist on logout
+		const unsubscribe = userStore.subscribe((user) => {
+			if (!user) {
+				// Clear watchlist when user logs out
 				watchlistStore.set([]);
 			}
-		};
-
-		// Initialize user from backend (stores already loaded from localStorage)
-		initUser().then(() => {
-			// Subscribe to user changes to sync watchlist
-			unsubscribe = userStore.subscribe((user) => {
-				if (user) {
-					loadWatchlist();
-				} else {
-					watchlistStore.set([]);
-				}
-			});
 		});
 
 		return () => {
-			unsubscribe?.();
+			unsubscribe();
 		};
 	});
 </script>

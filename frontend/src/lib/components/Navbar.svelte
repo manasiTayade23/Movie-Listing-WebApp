@@ -25,7 +25,6 @@
 						<span class="badge">{$watchlistStore.length}</span>
 					{/if}
 				</a>
-				<a href="/account">Account</a>
 				<span class="user-email">{$currentUserEmail || $userStore?.email}</span>
 				<button on:click={handleLogout} class="logout-btn">Logout</button>
 			{:else}

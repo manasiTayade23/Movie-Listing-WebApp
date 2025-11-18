@@ -1,12 +1,11 @@
-# MovieHub - Full Stack Movie Listing Application
+# MovieHub - SvelteKit Movie Listing Application
 
-A full-stack movie listing web application with separate backend and frontend.
+A SvelteKit movie listing web application built according to the assessment requirements.
 
 ## Project Structure
 
 ```
 SvelteKit/
-├── backend/          # Express.js backend API server
 ├── frontend/         # SvelteKit frontend application
 ├── README.md         # This file
 └── .gitignore        # Git ignore rules
@@ -14,9 +13,10 @@ SvelteKit/
 
 ## Architecture
 
-- **Backend**: Express.js REST API server (Node.js)
 - **Frontend**: SvelteKit application (TypeScript)
-- **Communication**: REST API with HTTP-only cookies for sessions
+- **Authentication**: Client-side using Svelte stores with localStorage
+- **Data Storage**: Browser localStorage via Svelte stores
+- **Movie Data**: Direct API calls to TMDb API
 
 ## Quick Start
 
@@ -26,41 +26,9 @@ SvelteKit/
 - npm or yarn
 - TMDb API key (free from [themoviedb.org](https://www.themoviedb.org/settings/api))
 
-### Setup Backend
+### Setup
 
-1. Navigate to backend directory:
-```bash
-cd backend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create `.env` file:
-```bash
-cp .env.example .env
-```
-
-4. Edit `.env` and add your TMDb API key:
-```
-PORT=3001
-TMDB_API_KEY=your_api_key_here
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-```
-
-5. Start the backend server:
-```bash
-npm run dev
-```
-
-The backend will run on `http://localhost:3001`
-
-### Setup Frontend
-
-1. Open a new terminal and navigate to frontend directory:
+1. Navigate to frontend directory:
 ```bash
 cd frontend
 ```
@@ -70,81 +38,73 @@ cd frontend
 npm install
 ```
 
-3. Create `.env` file:
-```bash
-cp .env.example .env
-```
-
-4. Edit `.env` (optional, defaults are fine):
-```
-VITE_API_URL=http://localhost:3001/api
-```
-
-5. Start the frontend development server:
-```bash
-npm run dev
-```
-
-The frontend will run on `http://localhost:5173`
-
-## Running Both Servers
-
-You need to run both servers simultaneously:
-
-**Terminal 1 - Backend:**
-```bash
-cd backend
-npm run dev
-```
-
-**Terminal 2 - Frontend:**
+3. Create `.env` file in the `frontend` directory:
 ```bash
 cd frontend
+echo "VITE_TMDB_API_KEY=your_api_key_here" > .env
+```
+
+   **Important**: Replace `your_api_key_here` with your actual TMDb API key.
+   
+   To get a free TMDb API key:
+   1. Go to https://www.themoviedb.org/settings/api
+   2. Sign up or log in
+   3. Request an API key
+   4. Copy your API key and paste it in the `.env` file
+
+4. Edit `.env` file and replace `your_api_key_here` with your actual API key:
+```
+VITE_TMDB_API_KEY=your_actual_api_key_here
+```
+
+5. Start the development server:
+```bash
 npm run dev
 ```
 
-Then open `http://localhost:5173` in your browser.
+The application will run on `http://localhost:5173`
+
+**Note**: This is a client-side only application. All data (user accounts, login information, watchlist) is stored in the browser's localStorage using Svelte stores. No backend server is required.
 
 ## Features
 
 - 🎬 **Movie Listings**: Browse popular movies from TMDb
 - 🔍 **Search**: Search movies by title
-- 📋 **Movie Details**: View detailed information
-- ⭐ **Watchlist**: Add/remove movies to watchlist
-- 🔐 **Authentication**: Login and signup
-- 🎯 **Filtering**: Filter by genre, year, and rating
+- 📋 **Movie Details**: View detailed information about a movie
+- ⭐ **Watchlist**: Add and remove movies to watchlist
+- 🔐 **Authentication**: User login and signup
+- 🎯 **Filtering**: Filter movies by genre, year, and rating
 
 ## Project Details
-
-### Backend (`/backend`)
-
-Express.js API server with:
-- RESTful API endpoints
-- Session management with HTTP-only cookies
-- TMDb API integration
-- In-memory database (replace with real DB in production)
-
-See [backend/README.md](./backend/README.md) for details.
 
 ### Frontend (`/frontend`)
 
 SvelteKit application with:
 - Modern UI with Svelte components
-- State management with Svelte stores
-- API client for backend communication
+- **State management with Svelte stores + browser storage** - **REQUIRED**: Login information and user accounts are stored using Svelte Store + browser storage (localStorage). The `userStore` and `userAccountsStore` automatically persist to browser localStorage.
+- Direct TMDb API integration
 - Responsive design
 
-See [frontend/README.md](./frontend/README.md) for details.
+**Svelte Concepts Used** (REQUIRED):
+- **Store**: Uses Svelte stores (`writable`, `derived`) for state management
+  - `userStore` - Current logged-in user (persisted in localStorage)
+  - `userAccountsStore` - List of user accounts (persisted in localStorage)
+  - `watchlistStore` - User's watchlist movie IDs (persisted in localStorage)
+  - `isAuthenticated` - Derived store checking authentication status
+- **Binding**: Uses two-way data binding (`bind:value`) in forms
+- **Async/await**: All API calls and async operations use async/await pattern
+- **Slot**: Uses Svelte slots in layout component (`+layout.svelte`)
+
+**Svelte Store + Browser Storage Implementation** (REQUIRED):
+- **`userStore`** - Stores current logged-in user information (email, name, id) using Svelte Store + browser localStorage
+- **`userAccountsStore`** - Stores list of user accounts with password hashes using Svelte Store + browser localStorage
+- **`watchlistStore`** - Stores user's watchlist movie IDs using Svelte Store + browser localStorage
+- All stores use `createPersistentStore()` which automatically:
+  - Loads from browser localStorage on initialization
+  - Saves to browser localStorage whenever values change
+  - Uses Svelte reactive stores for automatic UI updates
 
 ## Development
-
-### Backend Development
-
-```bash
-cd backend
-npm run dev    # Start with auto-reload
-npm start      # Start production server
-```
 
 ### Frontend Development
 
@@ -158,14 +118,6 @@ npm run check       # Type check
 
 ## Production Deployment
 
-### Backend
-
-1. Set `NODE_ENV=production` in `.env`
-2. Update `FRONTEND_URL` to your frontend URL
-3. Deploy to a Node.js hosting service (Heroku, Railway, etc.)
-
-### Frontend
-
 1. Build the application:
 ```bash
 cd frontend
@@ -173,45 +125,31 @@ npm run build
 ```
 
 2. Deploy the `build` folder to a static hosting service (Vercel, Netlify, etc.)
-3. Update `VITE_API_URL` to point to your backend URL
+3. Set `VITE_TMDB_API_KEY` environment variable in your hosting platform
 
 ## Environment Variables
 
-### Backend (.env)
-- `PORT` - Backend server port (default: 3001)
-- `TMDB_API_KEY` - TMDb API key (required)
-- `NODE_ENV` - Environment (development/production)
-- `FRONTEND_URL` - Frontend URL for CORS
-
 ### Frontend (.env)
-- `VITE_API_URL` - Backend API URL (default: http://localhost:3001/api)
+- `VITE_TMDB_API_KEY` - TMDb API key (required)
 
-## API Documentation
+## TMDb API Integration
 
-### Authentication
-- `POST /api/auth/login` - Login
-- `POST /api/auth/signup` - Signup
-- `POST /api/auth/logout` - Logout
-- `GET /api/auth/me` - Get current user
+The application uses the TMDb API directly from the frontend:
+- Popular movies: `/movie/popular`
+- Search movies: `/search/movie`
+- Movie details: `/movie/{id}`
+- Discover movies: `/discover/movie` (with filters)
+- Genres: `/genre/movie/list`
 
-### Movies
-- `GET /api/movies/popular` - Popular movies
-- `GET /api/movies/search?query=...` - Search movies
-- `GET /api/movies/:id` - Movie details
-- `GET /api/movies/discover` - Discover with filters
-- `GET /api/movies/genres` - Get genres
-
-### Watchlist (Requires Auth)
-- `GET /api/watchlist` - Get watchlist
-- `POST /api/watchlist` - Add movie
-- `DELETE /api/watchlist/:id` - Remove movie
+All API calls are made directly from the browser using the TMDb API key stored in environment variables.
 
 ## Notes
 
-- Backend uses in-memory database (data lost on restart)
-- Passwords stored in plain text (hash in production)
-- Session stored in HTTP-only cookies
-- CORS configured for frontend origin
+- **Client-side only**: No backend server required. All data is stored in browser localStorage.
+- **Authentication**: User accounts and login information are stored using Svelte stores with localStorage persistence.
+- **Password Storage**: Passwords are hashed using a simple hash function (for demo purposes). In production, use a proper hashing library.
+- **Watchlist**: Stored entirely in browser localStorage via Svelte stores. Each user's watchlist is stored locally.
+- **REQUIRED: Login information and user accounts are stored using Svelte Store + browser storage (localStorage)** - The `userStore` and `userAccountsStore` use Svelte stores that automatically persist to browser localStorage. All login and account data is stored locally in the browser.
 
 ## License
 

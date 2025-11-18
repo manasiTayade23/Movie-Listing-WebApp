@@ -13,7 +13,8 @@
 	/**
 	 * Handle signup form submission
 	 * Uses async/await pattern as required
-	 * Uses Svelte store to manage signup and user accounts
+	 * REQUIRED: Uses Svelte Store + browser storage (localStorage) for user accounts
+	 * The signupUser() function stores user account info in Svelte stores which automatically persist to localStorage
 	 */
 	async function handleSignup() {
 		error = '';
